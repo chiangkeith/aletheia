@@ -75,7 +75,7 @@ for (const rule of rules) {
 2. `id` 使用 kebab-case，且全局唯一。
 3. `severity` 只能是 `critical | high | medium | low | info`。
 4. 填写 `cwe` 与 `owasp`，便于报告和合规对照。
-5. `patterns` 写成尽可能收的正则，优先匹配 **sink + 动态拼接** 而不是某个 API 名称本身。
+5. `patterns` 写成尽可能收的正则，优先匹配 **sink + 动态拼接** 而不是某个 API 名称本身。需要上下文才能判断时，加可选 `accept(source, match)`，返回 `false` 即丢弃该命中。
 6. `remediation` 只写防御建议（参数化查询、白名单、编码），不要写利用方法。
 7. 在 `test/applyRules.test.js` 增加正例和反例。
 8. 若需要被夹具覆盖，把最小示例加到 `fixtures/sample-web-service`。

@@ -87,11 +87,12 @@
   id, title, severity, cwe, owasp,
   languages: string[],
   patterns: RegExp[],
+  accept: (source, match) => boolean, // 可选，去掉正则命中但上下文不成立的结果
   message, remediation
 }
 ```
 
-`applyRules` 对 `patterns` 做 `flatMap`。新增检测时优先在 `src/rules/catalog.js` 增加一条记录，而不是在流水线里加分支。
+`applyRules` 对 `patterns` 做 `flatMap`，再用可选的 `accept` 过滤。JavaScript / TypeScript 在匹配前会抹掉注释和正则字面量，并保持字符下标不变。新增检测时优先在 `src/rules/catalog.js` 增加一条记录，而不是在流水线里加分支。
 
 当前实现是 **启发式正则 SAST**：
 

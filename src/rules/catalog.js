@@ -1,4 +1,5 @@
 import { LANGUAGES } from "../core/constants.js";
+import { acceptHardcodedSecret, acceptWeakCrypto } from "./guards.js";
 
 const rule = (definition) => Object.freeze(definition);
 
@@ -21,7 +22,12 @@ export const RULES = Object.freeze([
     languages: ALL_CODE,
     patterns: [
       /\b(?:query|execute|exec|raw)\s*\(\s*[`'"][^`'"]*(?:\+|\$\{)/i,
-      /\b(?:SELECT|INSERT|UPDATE|DELETE|DROP)\b[^;\n]*(?:\+|%|\.format\(|f["']|\$\{)/i,
+      /(?<![\w.])(?:SELECT|INSERT|UPDATE|DELETE|DROP)\b[^;\n]{0,240}(?:\+|\$\{)/,
+      /[`'"]\s*(?:select|insert|update|delete|drop)\b[^`'"]{0,200}?\b(?:from|into|table|set|values)\b[^`'"]*[`'"]\s*\+/i,
+      /[`]\s*(?:select|insert|update|delete|drop)\b[^`]{0,200}?\b(?:from|into|table|set|values)\b[^`]*\$\{/i,
+      /\bf["']\s*(?:SELECT|INSERT|UPDATE|DELETE|DROP)\b/i,
+      /[`'"]\s*(?:SELECT|INSERT|UPDATE|DELETE|DROP)\b[^`'"]*[`'"]\s*\.format\s*\(/i,
+      /[`'"]\s*(?:SELECT|INSERT|UPDATE|DELETE|DROP)\b[^`'"]*%(?:s|d|\()/i,
       /Statement\s+\w+\s*=[\s\S]{0,80}\.execute(Query|Update)?\s*\(\s*["'][^"']*["']\s*\+/i,
       /fmt\.Sprintf\s*\(\s*["'][^"']*(?:SELECT|INSERT|UPDATE|DELETE)/i,
     ],
@@ -107,7 +113,8 @@ export const RULES = Object.freeze([
     patterns: [
       /\.(?:innerHTML|outerHTML)\s*=/,
       /\bdocument\.write\s*\(/,
-      /\bres\.send\s*\(\s*(?:req\.|`[^`]*\$\{)/,
+      /\bres\.send\s*\(\s*req\./,
+      /\bres\.send\s*\(\s*`[^`]*(?:<[a-zA-Z!/][^`]*\$\{|\$\{[^}]*(?:req\.|request\.|params|query|body))/,
       /echo\s+\$_(?:GET|POST|REQUEST)/,
       /render_template_string|Markup\s*\(/,
       /\{\{\s*.*\s*\|\s*safe\s*\}\}/,
@@ -162,6 +169,7 @@ export const RULES = Object.freeze([
       /AKIA[0-9A-Z]{16}/,
       /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----/,
     ],
+    accept: acceptHardcodedSecret,
     message: "A secret appears to be embedded in source or config.",
     remediation:
       "Move secrets to a secret manager or environment variables, rotate the exposed value, and add secret scanning to CI.",
@@ -180,7 +188,8 @@ export const RULES = Object.freeze([
       /hashlib\.(?:md5|sha1)\s*\(/,
       /MessageDigest\.getInstance\s*\(\s*["']MD5["']/,
     ],
-    message: "MD5, SHA-1, or DES are not suitable for passwords or integrity of new systems.",
+    accept: acceptWeakCrypto,
+    message: "MD5, SHA-1, or DES are not suitable for passwords, tokens, or new integrity checks.",
     remediation:
       "Use SHA-256+ for integrity and a password KDF such as Argon2id, scrypt, or bcrypt for credentials.",
   }),

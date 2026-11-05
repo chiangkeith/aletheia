@@ -36,8 +36,12 @@
 因此：
 
 - 参数化查询 `db.query("... ?", [name])` 不应命中 `sql-injection`
+- HTTP 客户端或路由方法（`.delete('/ticket/' + id)`、`app.update(...)`）不是 SQL，不应命中 `sql-injection`。SQL 关键字需要出现在语句里（大写语句，或带 `from` / `into` / `set` 的字符串）
+- `read -p "... Password: "` 这类提示语不是赋值，不应命中 `hardcoded-secret`。赋值右侧的引号必须是字面量的起始引号
+- `res.send(\`${log}\`)` 这种纯文本模板不应命中 `xss-sink`。会命中的是 HTML，或插值来自 `req` / `query` / `body`
+- `md5(userId)` 这类标识摘要不应命中 `weak-crypto`。会命中的是口令、token、secret，以及 `createHash('md5')`、`hashlib.md5`、DES
+- JavaScript / TypeScript 的注释会先抹掉再匹配，注释里的示例不应出报告
 - `readFile("/var/app/data/readme.txt")` 不应命中 `path-traversal`
-- 本地开发用的 `md5` 校验和可能误报 `weak-crypto`
 
 ## 处理误报
 

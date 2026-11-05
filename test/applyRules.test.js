@@ -57,3 +57,87 @@ test("flags md5 used as a function", () => {
   const ids = scanSnippet("javascript", "const digest = md5(password);\n");
   assert.equal(ids.includes("weak-crypto"), true);
 });
+
+test("flags lowercase SQL concatenation", () => {
+  const ids = scanSnippet(
+    "javascript",
+    'db.query("select * from users where id = " + req.query.id);\n',
+  );
+  assert.equal(ids.includes("sql-injection"), true);
+});
+
+test("does not treat an HTTP client delete as SQL", () => {
+  const ids = scanSnippet(
+    "javascript",
+    "supertest(app).delete('/ticket/' + ticketUuid);\n",
+  );
+  assert.equal(ids.includes("sql-injection"), false);
+});
+
+test("flags a template SQL query", () => {
+  const ids = scanSnippet(
+    "javascript",
+    "db.query(`SELECT * FROM users WHERE id = ${id}`);\n",
+  );
+  assert.equal(ids.includes("sql-injection"), true);
+});
+
+test("does not treat a password prompt as a hardcoded secret", () => {
+  const ids = scanSnippet(
+    "generic",
+    [
+      'read -p "Employee: ${EMPLOYEE_NUMBER} Initial Password: " -s USER_PASSWD',
+      'if [ `echo "$USER_PASSWD" | wc` ]',
+      "",
+    ].join("\n"),
+  );
+  assert.equal(ids.includes("hardcoded-secret"), false);
+});
+
+test("flags a hardcoded secret assignment", () => {
+  const ids = scanSnippet(
+    "javascript",
+    "const config = { SECRET : 'wannalookorbook' };\n",
+  );
+  assert.equal(ids.includes("hardcoded-secret"), true);
+});
+
+test("does not flag md5 of an identifier", () => {
+  const ids = scanSnippet(
+    "javascript",
+    "const review_reviewer_id = md5(reviewerId);\n",
+  );
+  assert.equal(ids.includes("weak-crypto"), false);
+});
+
+test("flags an explicit MD5 hash selection", () => {
+  const ids = scanSnippet(
+    "javascript",
+    "crypto.createHash('md5').update(payload).digest('hex');\n",
+  );
+  assert.equal(ids.includes("weak-crypto"), true);
+});
+
+test("does not flag a commented-out secret", () => {
+  const ids = scanSnippet(
+    "javascript",
+    '// const password = "supersecretvalue";\nconst ok = true;\n',
+  );
+  assert.equal(ids.includes("hardcoded-secret"), false);
+});
+
+test("does not flag a plain-text response template as XSS", () => {
+  const ids = scanSnippet(
+    "javascript",
+    "res.send(`${log.check_log_msg || ''}\\n${log.check_log_err || ''}`);\n",
+  );
+  assert.equal(ids.includes("xss-sink"), false);
+});
+
+test("flags HTML built from request data", () => {
+  const ids = scanSnippet(
+    "javascript",
+    "res.send(`<h1>${req.query.name}</h1>`);\n",
+  );
+  assert.equal(ids.includes("xss-sink"), true);
+});

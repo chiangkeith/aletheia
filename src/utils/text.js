@@ -1,10 +1,99 @@
+const blankSameShape = (text) => text.replace(/[^\n]/g, " ");
+
 export const stripComments = (source) =>
   source
-    .replace(/\/\*[\s\S]*?\*\//g, (block) => block.replace(/[^\n]/g, " "))
+    .replace(/\/\*[\s\S]*?\*\//g, blankSameShape)
     .replace(/(^|[^:])\/\/.*$/gm, "$1")
     .replace(/#(?![\s]*!).*?$/gm, "");
 
-const blankSameShape = (text) => text.replace(/[^\n]/g, " ");
+const nextIndex = (source, index, state) => {
+  let cursor = index;
+  while (cursor < source.length) {
+    const char = source[cursor];
+    if (char === "\\") {
+      cursor += 2;
+      continue;
+    }
+    cursor += 1;
+    if (char === state) {
+      return cursor;
+    }
+  }
+  return cursor;
+};
+
+const lineEnd = (source, index) => {
+  const end = source.indexOf("\n", index);
+  return end === -1 ? source.length : end;
+};
+
+const blockEnd = (source, index) => {
+  const end = source.indexOf("*/", index + 2);
+  return end === -1 ? source.length : end + 2;
+};
+
+export const maskComments = (source) => {
+  const pieces = [];
+  let cursor = 0;
+  while (cursor < source.length) {
+    const char = source[cursor];
+    const next = source[cursor + 1];
+    if (char === "'" || char === '"' || char === "`") {
+      const end = nextIndex(source, cursor + 1, char);
+      pieces.push(source.slice(cursor, end));
+      cursor = end;
+      continue;
+    }
+    if (char === "/" && next === "/") {
+      const end = lineEnd(source, cursor);
+      pieces.push(" ".repeat(end - cursor));
+      cursor = end;
+      continue;
+    }
+    if (char === "/" && next === "*") {
+      const end = blockEnd(source, cursor);
+      pieces.push(blankSameShape(source.slice(cursor, end)));
+      cursor = end;
+      continue;
+    }
+    pieces.push(char);
+    cursor += 1;
+  }
+  return pieces.join("");
+};
+
+export const quoteStateAt = (source, index) => {
+  let cursor = 0;
+  let state = null;
+  while (cursor < index) {
+    const char = source[cursor];
+    const next = source[cursor + 1];
+    if (state) {
+      if (char === "\\") {
+        cursor += 2;
+        continue;
+      }
+      state = char === state ? null : state;
+      cursor += 1;
+      continue;
+    }
+    if (char === "'" || char === '"' || char === "`") {
+      state = char;
+      cursor += 1;
+      continue;
+    }
+    if (char === "/" && next === "/") {
+      cursor = lineEnd(source, cursor);
+      continue;
+    }
+    if (char === "/" && next === "*") {
+      cursor = blockEnd(source, cursor);
+      continue;
+    }
+    cursor += 1;
+  }
+  return state;
+};
 
 export const maskRegexLiterals = (source) =>
   source.replace(

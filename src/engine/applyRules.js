@@ -1,9 +1,11 @@
 import { LANGUAGES } from "../core/constants.js";
-import { lineNumberAt, maskRegexLiterals, snippetAround } from "../utils/text.js";
+import { lineNumberAt, maskComments, maskRegexLiterals, snippetAround } from "../utils/text.js";
+
+const maskJavascript = (source) => maskComments(maskRegexLiterals(source));
 
 const SOURCE_PREPROCESSORS = Object.freeze({
-  [LANGUAGES.javascript]: maskRegexLiterals,
-  [LANGUAGES.typescript]: maskRegexLiterals,
+  [LANGUAGES.javascript]: maskJavascript,
+  [LANGUAGES.typescript]: maskJavascript,
 });
 
 const identity = (source) => source;
@@ -29,8 +31,11 @@ const toFinding = ({ file, rule, match }) => ({
 
 const applyRuleToFile = (file, rule) => {
   const searchable = sourceForMatching(file);
+  const accept = rule.accept ?? (() => true);
   return rule.patterns.flatMap((pattern) =>
-    matchAll(searchable, pattern).map((match) => toFinding({ file, rule, match })),
+    matchAll(searchable, pattern)
+      .filter((match) => accept(searchable, match))
+      .map((match) => toFinding({ file, rule, match })),
   );
 };
 
