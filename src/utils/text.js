@@ -4,6 +4,14 @@ export const stripComments = (source) =>
     .replace(/(^|[^:])\/\/.*$/gm, "$1")
     .replace(/#(?![\s]*!).*?$/gm, "");
 
+const blankSameShape = (text) => text.replace(/[^\n]/g, " ");
+
+export const maskRegexLiterals = (source) =>
+  source.replace(
+    /(?<=(?:^|[=(:,[!&|?:;,{}\[])\s*)\/(?:\[(?:\\.|[^\]])*\]|\\.|[^/\n])+\/[gimsuy]*/gm,
+    blankSameShape,
+  );
+
 export const splitLines = (source) => source.split(/\r?\n/);
 
 export const lineNumberAt = (source, index) =>

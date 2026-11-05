@@ -174,7 +174,7 @@ export const RULES = Object.freeze([
     owasp: "A02:2021 Cryptographic Failures",
     languages: ALL_CODE,
     patterns: [
-      /\b(?:md5|sha1)\b/i,
+      /\b(?:md5|sha1)\s*\(/i,
       /createHash\s*\(\s*['"](?:md5|sha1)['"]/i,
       /createCipher(?:iv)?\s*\(\s*['"]des/i,
       /hashlib\.(?:md5|sha1)\s*\(/,
@@ -296,7 +296,7 @@ export const RULES = Object.freeze([
     patterns: [
       /Object\.assign\s*\(\s*\w+\s*,\s*(?:req\.|JSON\.parse)/,
       /\[(?:req\.|key|payload)[^\]]*\]\s*=/,
-      /__proto__|constructor\s*\[/,
+      /\.__proto__|\[(['"])__proto__\1\]|constructor\s*\[/,
       /lodash\.merge|_\.merge\s*\(/,
     ],
     message: "Recursive merge or dynamic keys can pollute Object.prototype.",

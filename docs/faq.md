@@ -10,6 +10,16 @@
 
 本工具不向端口发探测包，也不登录远程服务。它只读源码和配置文本。要做运行时检测，请使用你被授权的 DAST 或集成测试，而不是把这个 CLI 改成攻击客户端。
 
+## 为什么扫描 Aletheia 自己会报夹具和规则文件？
+
+`fixtures/` 和 `test/` 里是故意写出来的不安全片段，用来验证规则。`src/rules/catalog.js` 里的正则字面量看起来也像危险代码。从本仓库根目录运行 `aletheia scan .` 时，仓库自带的 `aletheia.config.json` 会跳过样本目录；引擎在 JavaScript / TypeScript 中也不会把正则字面量当成真实 sink。
+
+若要检查夹具是否仍能被检出，请显式扫描它：
+
+```bash
+node bin/aletheia.js scan ./fixtures/sample-web-service
+```
+
 ## 为什么扫描 node_modules 没有结果？
 
 默认忽略依赖目录。第三方包体积大、误报多。若你明确要审计某个依赖源码，把该包拷到扫描目标并在配置里收窄 `include`。

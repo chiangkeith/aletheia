@@ -1,4 +1,15 @@
-import { lineNumberAt, snippetAround } from "../utils/text.js";
+import { LANGUAGES } from "../core/constants.js";
+import { lineNumberAt, maskRegexLiterals, snippetAround } from "../utils/text.js";
+
+const SOURCE_PREPROCESSORS = Object.freeze({
+  [LANGUAGES.javascript]: maskRegexLiterals,
+  [LANGUAGES.typescript]: maskRegexLiterals,
+});
+
+const identity = (source) => source;
+
+const sourceForMatching = (file) =>
+  (SOURCE_PREPROCESSORS[file.language] ?? identity)(file.source);
 
 const matchAll = (source, pattern) => [...source.matchAll(new RegExp(pattern, pattern.flags.includes("g") ? pattern.flags : `${pattern.flags}g`))];
 
@@ -16,10 +27,12 @@ const toFinding = ({ file, rule, match }) => ({
   snippet: snippetAround(file.source, match.index ?? 0),
 });
 
-const applyRuleToFile = (file, rule) =>
-  rule.patterns.flatMap((pattern) =>
-    matchAll(file.source, pattern).map((match) => toFinding({ file, rule, match })),
+const applyRuleToFile = (file, rule) => {
+  const searchable = sourceForMatching(file);
+  return rule.patterns.flatMap((pattern) =>
+    matchAll(searchable, pattern).map((match) => toFinding({ file, rule, match })),
   );
+};
 
 const uniqueKey = (finding) => `${finding.file}:${finding.line}:${finding.ruleId}`;
 

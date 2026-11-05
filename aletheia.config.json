@@ -1,0 +1,24 @@
+{
+  "include": ["**/*"],
+  "exclude": [
+    "**/test/**",
+    "**/*.test.js",
+    "**/fixtures/**"
+  ],
+  "languages": [
+    "javascript",
+    "typescript",
+    "python",
+    "php",
+    "java",
+    "go",
+    "generic"
+  ],
+  "minSeverity": "low",
+  "failOn": "high",
+  "format": "table",
+  "rules": {
+    "enable": [],
+    "disable": []
+  }
+}

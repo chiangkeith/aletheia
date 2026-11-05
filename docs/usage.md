@@ -122,6 +122,8 @@ aletheia init [--force]
 
 默认始终忽略：`node_modules`、`.git`、`dist`、`build`、`coverage`、`vendor`、虚拟环境、锁文件、压缩后的 `*.min.js` 等。完整列表见 `src/core/constants.js` 的 `DEFAULT_IGNORE`。
 
+本仓库根目录的 `aletheia.config.json` 还会排除 `test/` 与 `fixtures/`。这两处是检测器自己的样本，不是待审计的 Web 服务。对 **其它项目** 做扫描时，请把 `scan` 的目标指向那个项目；需要的话再用 `--config` 指向该项目自己的配置。
+
 ## 退出码
 
 | 码 | 何时 |

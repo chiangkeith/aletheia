@@ -4,7 +4,9 @@
     "**/node_modules/**",
     "**/dist/**",
     "**/coverage/**",
-    "**/vendor/**"
+    "**/vendor/**",
+    "**/test/**",
+    "**/fixtures/**"
   ],
   "languages": [
     "javascript",

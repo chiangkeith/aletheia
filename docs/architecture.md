@@ -53,7 +53,7 @@
 3. **getRules**  
    按语言、enable 白名单、disable 黑名单过滤规则表。
 4. **applyRules**  
-   对每个文件、每条适用规则执行正则匹配，生成 finding 对象，并按 `file:line:ruleId:snippet` 去重。
+   对每个文件、每条适用规则执行正则匹配，生成 finding 对象，并按 `file:line:ruleId` 去重。JavaScript / TypeScript 会先把正则字面量遮掉，避免规则表自己匹配自己。
 5. **meetsSeverity + sortFindings**  
    丢掉低于 `minSeverity` 的项，再按严重级别与路径排序。
 6. **summarizeFindings**  

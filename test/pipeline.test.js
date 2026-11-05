@@ -25,3 +25,13 @@ test("scanProject reports expected issues in the sample service", async () => {
   );
   assert.equal(shouldFail(result.findings, "high"), true);
 });
+
+test("self-scan skips sample fixtures, tests, and rule regex literals", async () => {
+  const config = await loadConfig({ cwd: root });
+  const result = await scanProject({ target: root, config });
+  const noisy = result.findings.filter((finding) =>
+    /^(fixtures|test)\//.test(finding.file) || finding.file.endsWith("rules/catalog.js"),
+  );
+
+  assert.equal(noisy.length, 0);
+});
