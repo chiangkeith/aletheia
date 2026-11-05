@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- README 补充规则与 CWE / OWASP / ASVS 对照，说明启发式 SAST 的实务定位
 - 降低误报：SQL 规则不再把 `.delete('/path/' + id)` 当成 SQL；硬编码密钥忽略提示语中的 `Password:`；`xss-sink` 只看 HTML 或请求数据插值；`weak-crypto` 的 `md5()` / `sha1()` 只在口令、token、secret 或显式弱算法 API 上报告
 - JavaScript / TypeScript 匹配前会忽略注释
 - `scan` 在 stderr 显示扫描过程（目标、文件数、当前文件、耗时与发现摘要），可用 `--quiet` / `--no-progress` 关闭，`--verbose` 列出每个文件

@@ -84,6 +84,45 @@ node bin/aletheia.js scan ./fixtures/sample-web-service
 
 `fixtures/sample-web-service` 里是 **故意不安全的示例代码**，只用于测试检测器，不要部署。
 
+## 规则与参考基础
+
+规则找的是仍常见的源码缺陷，不是某个 CVE 库，也不会对运行中的服务发请求。每条规则对照 **CWE** 缺陷类型和 **OWASP Top 10:2021** 分类；修复方向与 [OWASP ASVS](https://owasp.org/www-project-application-security-verification-standard/) 一类的验证要求一致（参数化查询、密钥不进仓库、校验证书等）。
+
+检测方法是 **启发式正则 SAST**：匹配危险 sink（拼接 SQL、`exec`、`eval`、`pickle.loads` 等）以及不可信输入痕迹（`req.query`、字符串 `+`、`${}`）。适合本地和 CI 的第一道门。没有 AST 与污点跟踪，中间变量、跨文件封装可能漏报；命中后应打开源码确认数据是否真的来自用户。完整误报/漏报说明见 [docs/rules.md](docs/rules.md)。
+
+实务对照：
+
+| 来源 | 本工具怎么用 |
+| --- | --- |
+| [CWE](https://cwe.mitre.org/) | 每条规则的缺陷编号（如 CWE-89 SQL 注入） |
+| [OWASP Top 10:2021](https://owasp.org/Top10/) | 注入、失效访问控制、加密失败等分类 |
+| [CWE Top 25](https://cwe.mitre.org/top25/) | 近年仍高频的注入、路径穿越、反序列化、硬编码凭证 |
+| [OWASP ASVS](https://owasp.org/www-project-application-security-verification-standard/) | 报告里的修复方向（参数化查询、密钥外置、TLS 校验） |
+
+规则与编号对照（完整列表以 `aletheia rules` 为准）：
+
+| 规则 | 级别 | CWE | OWASP Top 10:2021 |
+| --- | --- | --- | --- |
+| `sql-injection` | critical | CWE-89 | A03 Injection |
+| `command-injection` | critical | CWE-78 | A03 Injection |
+| `code-injection` | critical | CWE-94 | A03 Injection |
+| `insecure-deserialization` | critical | CWE-502 | A08 Software and Data Integrity Failures |
+| `path-traversal` | high | CWE-22 | A01 Broken Access Control |
+| `ssrf` | high | CWE-918 | A10 SSRF |
+| `xss-sink` | high | CWE-79 | A03 Injection |
+| `hardcoded-secret` | high | CWE-798 | A07 Identification and Authentication Failures |
+| `insecure-tls` | high | CWE-295 | A02 Cryptographic Failures |
+| `jwt-none-alg` | high | CWE-347 | A07 Identification and Authentication Failures |
+| `prototype-pollution` | high | CWE-1321 | A03 Injection |
+| `xxe` | high | CWE-611 | A05 Security Misconfiguration |
+| `open-redirect` | medium | CWE-601 | A01 Broken Access Control |
+| `weak-crypto` | medium | CWE-327 | A02 Cryptographic Failures |
+| `debug-enabled` | medium | CWE-489 | A05 Security Misconfiguration |
+| `cors-misconfiguration` | medium | CWE-942 | A05 Security Misconfiguration |
+| `cookie-security` | medium | CWE-614 | A05 Security Misconfiguration |
+| `mass-assignment` | medium | CWE-915 | A04 Insecure Design |
+| `missing-authz-todo` | low | CWE-285 | A01 Broken Access Control |
+
 ## 文档索引
 
 | 文档 | 内容 |

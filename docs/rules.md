@@ -1,6 +1,6 @@
 # 规则说明
 
-内置规则定义在 `src/rules/catalog.js`。用 `node bin/aletheia.js rules` 查看当前构建里的完整列表。
+内置规则定义在 `src/rules/catalog.js`。用 `node bin/aletheia.js rules` 查看当前构建里的完整列表。规则与 CWE / OWASP / ASVS 的对照与定位见 [README](../README.md#规则与参考基础)。
 
 ## 规则一览
 
