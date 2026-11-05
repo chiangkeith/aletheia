@@ -59,8 +59,8 @@ export const DEFAULT_IGNORE = Object.freeze([
 ]);
 
 export const DEFAULT_CONFIG_NAMES = Object.freeze([
-  "webvuln.config.json",
-  ".webvuln.json",
+  "aletheia.config.json",
+  ".aletheia.json",
 ]);
 
 export const EXIT_CODES = Object.freeze({

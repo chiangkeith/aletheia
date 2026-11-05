@@ -1,6 +1,6 @@
 # 贡献指南
 
-感谢你改进 webvuln-analyzer。请先阅读 [开发人员手册](developer-handbook.md) 与 [架构](architecture.md)。
+感谢你改进 Aletheia。请先阅读 [开发人员手册](developer-handbook.md) 与 [架构](architecture.md)。
 
 ## 流程
 

@@ -5,7 +5,7 @@ coverage/
 .tmp/
 dist/
 reports/
-.webvuln.cache/
+.aletheia.cache/
 .env
 .env.*
 !.env.example

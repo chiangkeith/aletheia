@@ -11,19 +11,19 @@
 克隆后：
 
 ```bash
-cd webvuln-analyzer
+cd aletheia
 npm install
 npm test
-node bin/webvuln.js scan ./fixtures/sample-web-service
+node bin/aletheia.js scan ./fixtures/sample-web-service
 ```
 
-建议把 `./bin/webvuln.js` 放进 PATH，或使用 `npm link`。
+建议把 `./bin/aletheia.js` 放进 PATH，或使用 `npm link`。
 
 ## 目录约定
 
 ```
-webvuln-analyzer/
-├── bin/webvuln.js          # shebang 入口，只负责调用 CLI
+aletheia/
+├── bin/aletheia.js          # shebang 入口，只负责调用 CLI
 ├── src/
 │   ├── index.js            # 库导出
 │   ├── cli/                # commander 命令
@@ -128,7 +128,7 @@ npm test
 只跑一条规则：
 
 ```bash
-node bin/webvuln.js scan ./fixtures/sample-web-service --only sql-injection --format json
+node bin/aletheia.js scan ./fixtures/sample-web-service --only sql-injection --format json
 ```
 
 提高详细程度时，用 JSON 看 `snippet` 和 `line` 是否指到预期位置。
@@ -138,7 +138,7 @@ node bin/webvuln.js scan ./fixtures/sample-web-service --only sql-injection --fo
 ## 作为库调用
 
 ```js
-import { loadConfig, scanProject, renderReport } from "webvuln-analyzer";
+import { loadConfig, scanProject, renderReport } from "aletheia";
 
 const config = await loadConfig({ cwd: process.cwd() });
 const result = await scanProject({ target: "./service", config });

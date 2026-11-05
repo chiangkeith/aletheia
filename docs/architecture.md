@@ -1,6 +1,6 @@
 # 开发架构
 
-本文说明 webvuln-analyzer 如何组织代码、数据如何流动，以及为什么采用这种拆分。
+本文说明 Aletheia 如何组织代码、数据如何流动，以及为什么采用这种拆分。
 
 ## 目标
 
@@ -101,7 +101,7 @@
 优先级从低到高：
 
 1. `src/core/config.js` 中的默认值
-2. 工作目录下的 `webvuln.config.json` 或 `.webvuln.json`
+2. 工作目录下的 `aletheia.config.json` 或 `.aletheia.json`
 3. `--config` 指定的文件
 4. CLI 显式传入的覆盖项
 

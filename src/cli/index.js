@@ -7,14 +7,14 @@ const buildProgram = () => {
   const program = new Command();
 
   program
-    .name("webvuln")
-    .description("Static analyzer for web service source code")
+    .name("aletheia")
+    .description("Unconceal security flaws in web service source code")
     .version("1.0.0");
 
   program
     .command("scan")
     .argument("[target]", "path to a web service project", ".")
-    .option("-c, --config <path>", "path to webvuln.config.json")
+    .option("-c, --config <path>", "path to aletheia.config.json")
     .option("-f, --format <format>", "table | json | markdown | sarif", "table")
     .option("-o, --output <path>", "write the report to a file")
     .option("--min-severity <level>", "info | low | medium | high | critical", "info")
@@ -35,7 +35,7 @@ const buildProgram = () => {
 
   program
     .command("init")
-    .description("write webvuln.config.json in the current directory")
+    .description("write aletheia.config.json in the current directory")
     .option("--force", "overwrite an existing config file")
     .action((options) => initCommand(options));
 

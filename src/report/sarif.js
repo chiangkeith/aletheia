@@ -40,9 +40,9 @@ export const renderSarif = (result) => {
       {
         tool: {
           driver: {
-            name: "webvuln-analyzer",
+            name: "aletheia",
             version: "1.0.0",
-            informationUri: "https://github.com/example/webvuln-analyzer",
+            informationUri: "https://github.com/example/aletheia",
             rules: ruleIds.map((ruleId) => toRule(ruleId, result.findings)),
           },
         },

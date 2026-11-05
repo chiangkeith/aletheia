@@ -16,7 +16,7 @@ const SAMPLE_CONFIG = {
 };
 
 export const initCommand = async ({ force = false } = {}) => {
-  const path = join(process.cwd(), "webvuln.config.json");
+  const path = join(process.cwd(), "aletheia.config.json");
   if ((await fileExists(path)) && !force) {
     throw new Error(`${path} already exists. Re-run with --force to overwrite.`);
   }

@@ -1,6 +1,6 @@
 # 规则说明
 
-内置规则定义在 `src/rules/catalog.js`。用 `node bin/webvuln.js rules` 查看当前构建里的完整列表。
+内置规则定义在 `src/rules/catalog.js`。用 `node bin/aletheia.js rules` 查看当前构建里的完整列表。
 
 ## 规则一览
 
@@ -45,10 +45,10 @@
 
 1. **先看源码**。确认数据是否来自用户、是否已校验。
 2. 单次扫描排除规则：`--disable weak-crypto,xxe`
-3. 在 `webvuln.config.json` 的 `rules.disable` 或更窄的 `include`/`exclude` 里持久化
+3. 在 `aletheia.config.json` 的 `rules.disable` 或更窄的 `include`/`exclude` 里持久化
 4. 若模式本身过宽，提交规则补丁并附上正例 / 反例测试
 
-不要用注释协议以外的“关闭扫描器”技巧在业务代码里堆特殊标记；当前版本没有 `webvuln-disable` 行内指令，以免规则绕过变得不透明。若需要该能力，应作为显式功能加入 engine，并写进本页。
+不要用注释协议以外的“关闭扫描器”技巧在业务代码里堆特殊标记；当前版本没有 `aletheia-disable` 行内指令，以免规则绕过变得不透明。若需要该能力，应作为显式功能加入 engine，并写进本页。
 
 ## 漏报
 

@@ -3,26 +3,26 @@
 ## 命令
 
 ```
-webvuln <command>
+aletheia <command>
 ```
 
 | 命令 | 作用 |
 | --- | --- |
 | `scan [target]` | 扫描一个目录或单个文件，默认 `.` |
 | `rules` | 列出内置规则 |
-| `init` | 在当前目录生成 `webvuln.config.json` |
+| `init` | 在当前目录生成 `aletheia.config.json` |
 
 全局选项：
 
 ```
-webvuln --help
-webvuln --version
+aletheia --help
+aletheia --version
 ```
 
 ## scan
 
 ```
-webvuln scan [target] [options]
+aletheia scan [target] [options]
 ```
 
 | 选项 | 默认 | 说明 |
@@ -45,19 +45,19 @@ webvuln scan [target] [options]
 扫描相邻的 Web 服务仓库：
 
 ```bash
-node bin/webvuln.js scan ../AK01-Service --format table
+node bin/aletheia.js scan ../AK01-Service --format table
 ```
 
 只要 Python 与通用配置文件：
 
 ```bash
-node bin/webvuln.js scan ./service --languages python,generic
+node bin/aletheia.js scan ./service --languages python,generic
 ```
 
 关闭 CORS 规则，只关注注入类：
 
 ```bash
-node bin/webvuln.js scan ./service \
+node bin/aletheia.js scan ./service \
   --only sql-injection,command-injection,code-injection \
   --format markdown \
   --output reports/injection.md
@@ -67,36 +67,36 @@ node bin/webvuln.js scan ./service \
 
 ```bash
 mkdir -p reports
-node bin/webvuln.js scan . --format sarif --output reports/webvuln.sarif
+node bin/aletheia.js scan . --format sarif --output reports/aletheia.sarif
 ```
 
 ## rules
 
 ```
-webvuln rules [--id <ruleId>] [--json]
+aletheia rules [--id <ruleId>] [--json]
 ```
 
 ```bash
-node bin/webvuln.js rules
-node bin/webvuln.js rules --id hardcoded-secret --json
+node bin/aletheia.js rules
+node bin/aletheia.js rules --id hardcoded-secret --json
 ```
 
 ## init
 
 ```
-webvuln init [--force]
+aletheia init [--force]
 ```
 
-若当前目录已有 `webvuln.config.json`，必须加 `--force` 才会覆盖。
+若当前目录已有 `aletheia.config.json`，必须加 `--force` 才会覆盖。
 
 ## 配置文件
 
 工具按以下名字查找（当前工作目录）：
 
-1. `webvuln.config.json`
-2. `.webvuln.json`
+1. `aletheia.config.json`
+2. `.aletheia.json`
 
-也可用 `--config` 显式指定。完整示例见 `examples/webvuln.config.json`。
+也可用 `--config` 显式指定。完整示例见 `examples/aletheia.config.json`。
 
 字段：
 
@@ -137,7 +137,7 @@ webvuln init [--force]
 ### GitHub Actions
 
 ```yaml
-name: webvuln
+name: aletheia
 on: [push, pull_request]
 jobs:
   scan:
@@ -149,14 +149,14 @@ jobs:
           node-version: "24"
       - name: Install scanner
         run: |
-          cd webvuln-analyzer
+          cd aletheia
           npm install
       - name: Scan this repository
-        run: node webvuln-analyzer/bin/webvuln.js scan . --format sarif --output webvuln.sarif --fail-on high
+        run: node aletheia/bin/aletheia.js scan . --format sarif --output aletheia.sarif --fail-on high
       - uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: webvuln.sarif
+          sarif_file: aletheia.sarif
 ```
 
 把 `scan` 的目标换成待审计的服务路径即可。扫描器与目标仓库可以是同一份 checkout，也可以是单独检出的依赖工程。
@@ -164,14 +164,14 @@ jobs:
 ### 本地 pre-commit
 
 ```bash
-node bin/webvuln.js scan . --min-severity medium --fail-on critical
+node bin/aletheia.js scan . --min-severity medium --fail-on critical
 ```
 
 ## 解读报告
 
 每条发现包含：
 
-- **ruleId**：规则标识，可用 `webvuln rules --id` 查看详情
+- **ruleId**：规则标识，可用 `aletheia rules --id` 查看详情
 - **severity / cwe / owasp**：分级与对照
 - **file:line**：源码位置（相对扫描根目录）
 - **snippet**：命中附近的文本

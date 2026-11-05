@@ -1,8 +1,18 @@
-# webvuln-analyzer
+# Aletheia（去蔽）
 
 针对 **Web 服务源代码** 的静态漏洞分析 CLI。它在本地读取目标仓库，用一组可扩展的检测规则找出常见安全问题，并输出人类可读报告或 CI 可用的 JSON / SARIF。
 
 本工具做的是 **静态代码分析（SAST）**，不是网络扫描器，也不会对运行中的系统发送攻击请求。分析对象应是你有权审计的代码。
+
+## 命名
+
+**Aletheia** 来自希腊文 **ἀλήθεια**，读作 /əˈliːθiə/（阿-勒-忒-娅）。
+
+它由否定前缀 *a-*（不）与 *lethe*（遗忘、遮蔽）组成。冥河勒忒（Lethe）让灵魂喝水而忘却；Aletheia 的字面意思是 **把被遗忘、被盖住的东西重新取出来**。海德格尔后来用这个词讲「真理」：不是把判断对齐事实，而是让事物从遮蔽中自行显现。
+
+这正是本工具要做的事。漏洞往往不是另附在代码上的外来物，而是被字符串拼接、默认配置和「先这样写」遮住的结构。Aletheia 不攻击运行中的服务，也不发明利用；它只是把源码里已经存在、却尚未被看见的裂隙照出来，好让人修补。
+
+命令行因此叫 `aletheia`：去蔽，而非征伐。
 
 ## 功能概览
 
@@ -10,7 +20,7 @@
 - 覆盖 OWASP Top 10 相关模式：注入、路径穿越、SSRF、密钥硬编码、弱加密、CORS 过宽等
 - CLI 命令：`scan`、`rules`、`init`
 - 报告格式：`table`、`json`、`markdown`、`sarif`
-- 可用 `webvuln.config.json` 和 CLI 参数过滤语言、规则、严重级别
+- 可用 `aletheia.config.json` 和 CLI 参数过滤语言、规则、严重级别
 - `--fail-on` 便于接入 CI：达到阈值时以退出码 `2` 失败
 
 ## 要求
@@ -21,9 +31,9 @@
 ## 安装
 
 ```bash
-cd webvuln-analyzer
+cd aletheia
 npm install
-chmod +x bin/webvuln.js
+chmod +x bin/aletheia.js
 ```
 
 全局可用（可选）：
@@ -32,10 +42,10 @@ chmod +x bin/webvuln.js
 npm link
 ```
 
-之后直接执行 `webvuln`。不 link 时用：
+之后直接执行 `aletheia`。不 link 时用：
 
 ```bash
-node bin/webvuln.js --help
+node bin/aletheia.js --help
 ```
 
 ## 快速开始
@@ -43,40 +53,40 @@ node bin/webvuln.js --help
 扫描当前目录：
 
 ```bash
-node bin/webvuln.js scan .
+node bin/aletheia.js scan .
 ```
 
 扫描其它 Web 服务仓库，并写出 Markdown 报告：
 
 ```bash
-node bin/webvuln.js scan /path/to/web-service \
+node bin/aletheia.js scan /path/to/web-service \
   --format markdown \
-  --output reports/webvuln.md
+  --output reports/aletheia.md
 ```
 
 只看高危及以上，并在存在 high/critical 时让 CI 失败：
 
 ```bash
-node bin/webvuln.js scan ./service --min-severity high --fail-on high
+node bin/aletheia.js scan ./service --min-severity high --fail-on high
 ```
 
 列出内置规则：
 
 ```bash
-node bin/webvuln.js rules
-node bin/webvuln.js rules --id sql-injection --json
+node bin/aletheia.js rules
+node bin/aletheia.js rules --id sql-injection --json
 ```
 
 生成配置文件：
 
 ```bash
-node bin/webvuln.js init
+node bin/aletheia.js init
 ```
 
 用自带夹具验证工具是否工作：
 
 ```bash
-node bin/webvuln.js scan ./fixtures/sample-web-service
+node bin/aletheia.js scan ./fixtures/sample-web-service
 ```
 
 `fixtures/sample-web-service` 里是 **故意不安全的示例代码**，只用于测试检测器，不要部署。
@@ -99,7 +109,7 @@ node bin/webvuln.js scan ./fixtures/sample-web-service
 扫描是一条纯函数风格的流水线：
 
 ```
-CLI 参数 / webvuln.config.json
+CLI 参数 / aletheia.config.json
         │
         ▼
    loadConfig()          合并默认值、文件配置、命令行覆盖
@@ -137,7 +147,7 @@ src/
 
 ## 设计原则
 
-- **防御性**：只报告可疑代码位置与修复方向，不生成利用步骤或攻击载荷
+- **去蔽**：只报告可疑代码位置与修复方向，不生成利用步骤或攻击载荷
 - **函数式**：核心逻辑是纯函数；I/O 留在 CLI、文件读取和写报告的边缘
 - **数据驱动**：新增检测优先加规则表，而不是加一长串 `if/else`
 - **可组合**：`scanProject` 也可作为库调用，不一定走 CLI

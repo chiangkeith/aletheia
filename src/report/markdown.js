@@ -32,7 +32,7 @@ export const renderMarkdown = (result) => {
       : result.findings.map(findingSection).join("\n");
 
   return [
-    `# WebVuln Scan Report`,
+    `# Aletheia Scan Report`,
     "",
     `- Target: \`${result.target}\``,
     `- Scanned at: ${result.scannedAt}`,
