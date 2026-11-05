@@ -9,6 +9,12 @@ test("matches ** globs at the repository root and in nested folders", () => {
   assert.equal(matchesAnyGlob("vendor/jquery.min.js", ["**/*.min.js"]), true);
   assert.equal(matchesAnyGlob("node_modules/pkg/index.js", ["**/node_modules/**"]), true);
   assert.equal(matchesAnyGlob("src/index.js", ["**/node_modules/**"]), false);
+  assert.equal(
+    matchesAnyGlob("admin/.output/public/_nuxt/BeSCYm_v.js", ["**/.output/**"]),
+    true,
+  );
+  assert.equal(matchesAnyGlob("src/app.js", ["**/.output/**"]), false);
+  assert.equal(matchesAnyGlob("public/_nuxt/entry.js", ["**/_nuxt/**"]), true);
 });
 
 test("maskRegexLiterals blanks literals but keeps surrounding code and line offsets", () => {

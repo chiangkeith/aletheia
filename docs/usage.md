@@ -28,8 +28,8 @@ aletheia scan [target] [options]
 | 选项 | 默认 | 说明 |
 | --- | --- | --- |
 | `-c, --config <path>` | 自动发现 | 配置文件路径 |
-| `-f, --format <format>` | `table` | `table` `json` `markdown` `sarif` |
-| `-o, --output <path>` | stdout | 把报告写入文件 |
+| `-f, --format <format>` | `table`，或从 `--output` 扩展名推断 | `table` `json` `markdown` `sarif` |
+| `-o, --output <path>` | stdout | 把报告写入文件；缺少的父目录会自动创建 |
 | `--min-severity <level>` | `info` | 低于该级别的发现不输出 |
 | `--fail-on <level>` | `high` | 存在该级别及以上发现时退出码为 2 |
 | `--languages <list>` | 全部支持语言 | 逗号分隔 |
@@ -37,8 +37,35 @@ aletheia scan [target] [options]
 | `--exclude <globs>` | 默认忽略列表 | **额外**忽略，会与默认列表合并 |
 | `--only <ids>` | 全部规则 | 只启用这些规则 |
 | `--disable <ids>` | 无 | 禁用这些规则 |
+| `--no-progress` / `-q, --quiet` | 进度开启 | 关闭 stderr 上的扫描过程 |
+| `-v, --verbose` | 关闭 | 每扫描一个文件就输出一行 |
 
 严重级别从高到低：`critical` > `high` > `medium` > `low` > `info`。
+
+### 扫描过程
+
+默认会在 **stderr** 显示扫描过程，**stdout 只有报告**。因此 `--format json` / `sarif` 仍可直接管道给其它程序，进度不会混进报告。
+
+```
+Aletheia
+  target       /path/to/service
+  config       /path/to/aletheia.config.json
+  languages    javascript, python, generic
+  rules        all built-in
+  min-severity info
+  fail-on      high
+Collecting source files...
+  42 files (generic=4, javascript=30, python=8)
+Reading 42 files...
+Applying 18 rules to 42 files...
+Done in 0.84s — 7 findings (critical=1, high=3, medium=2, low=1)
+
+Target        : /path/to/service
+Duration      : 0.84s
+...
+```
+
+交互式终端里，当前正在分析的文件会在同一行更新；CI（非 TTY）只打印阶段，避免每个文件刷一行。`--verbose` 则始终列出文件。`--output` 写报告文件时，stderr 还会提示写入路径。
 
 ### 示例
 
@@ -66,9 +93,10 @@ node bin/aletheia.js scan ./service \
 生成 SARIF 供代码扫描平台消费：
 
 ```bash
-mkdir -p reports
-node bin/aletheia.js scan . --format sarif --output reports/aletheia.sarif
+node bin/aletheia.js scan . --output reports/aletheia.sarif
 ```
+
+`--output reports/aletheia.md` 会写成 Markdown；`.json` / `.sarif` 同理。不必先 `mkdir`。需要覆盖推断时再加 `-f`。
 
 ## rules
 
@@ -120,7 +148,9 @@ aletheia init [--force]
 - `rules.disable` 在白名单之后再剔除。
 - CLI 与文件同时存在时，**CLI 覆盖文件**；`exclude` 则是合并。
 
-默认始终忽略：`node_modules`、`.git`、`dist`、`build`、`coverage`、`vendor`、虚拟环境、锁文件、压缩后的 `*.min.js` 等。完整列表见 `src/core/constants.js` 的 `DEFAULT_IGNORE`。
+默认始终忽略依赖、构建产物和打包结果，只扫**源码**：`node_modules`、`.git`、`dist`、`build`、`out`、`.output`（Nuxt/Nitro）、`.nuxt`、`.next`、`_nuxt`、虚拟环境、锁文件、`*.min.js` / `*.bundle.js` / `*.chunk.js` 等。完整列表见 `src/core/constants.js` 的 `DEFAULT_IGNORE`。
+
+另外还会跳过过大（默认超过 256KB）或明显被压缩成极少行的 JavaScript / TypeScript。这些文件正则匹配极慢，也不是要审计的源码。进度里会显示 `skipped N packed or oversized files`。
 
 本仓库根目录的 `aletheia.config.json` 还会排除 `test/` 与 `fixtures/`。这两处是检测器自己的样本，不是待审计的 Web 服务。对 **其它项目** 做扫描时，请把 `scan` 的目标指向那个项目；需要的话再用 `--config` 指向该项目自己的配置。
 

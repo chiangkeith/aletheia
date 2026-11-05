@@ -18,6 +18,12 @@ test("scanProject reports expected issues in the sample service", async () => {
   const ids = [...new Set(result.findings.map((finding) => finding.ruleId))];
 
   assert.equal(result.filesScanned >= 3, true);
+  assert.equal(result.filesSkipped, 0);
+  assert.equal(typeof result.durationMs, "number");
+  assert.equal(
+    result.findings.some((finding) => finding.file.includes(".output")),
+    false,
+  );
   ["sql-injection", "command-injection", "hardcoded-secret", "path-traversal"].forEach(
     (ruleId) => {
       assert.equal(ids.includes(ruleId), true, `missing ${ruleId}`);
@@ -34,4 +40,42 @@ test("self-scan skips sample fixtures, tests, and rule regex literals", async ()
   );
 
   assert.equal(noisy.length, 0);
+});
+
+test("scanProject emits progress stages", async () => {
+  const config = await loadConfig({
+    cwd: root,
+    cliOverrides: { minSeverity: "low" },
+  });
+  const events = [];
+  await scanProject({
+    target: fixture,
+    config,
+    onProgress: (event) => {
+      events.push(event);
+    },
+  });
+
+  const types = events.map((event) => event.type);
+  assert.deepEqual(
+    types.filter((type) => type !== "match:item"),
+    [
+      "scan:start",
+      "collect:start",
+      "collect:done",
+      "read:start",
+      "read:done",
+      "scan:skip",
+      "match:start",
+      "match:done",
+      "scan:done",
+    ],
+  );
+  assert.equal(
+    events.some((event) => event.type === "match:item" && event.file),
+    true,
+  );
+  const collected = events.find((event) => event.type === "collect:done");
+  assert.equal(collected.total >= 3, true);
+  assert.equal(collected.languageCounts.javascript > 0, true);
 });

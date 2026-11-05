@@ -36,14 +36,16 @@ const applyRuleToFile = (file, rule) => {
 
 const uniqueKey = (finding) => `${finding.file}:${finding.line}:${finding.ruleId}`;
 
+export const findingsForFile = (file, rules) =>
+  rules
+    .filter((rule) => rule.languages.includes(file.language))
+    .flatMap((rule) => applyRuleToFile(file, rule));
+
+export const dedupeFindings = (findings) =>
+  findings.filter(
+    (finding, index, all) =>
+      all.findIndex((item) => uniqueKey(item) === uniqueKey(finding)) === index,
+  );
+
 export const applyRules = (files, rules) =>
-  files
-    .flatMap((file) =>
-      rules
-        .filter((rule) => rule.languages.includes(file.language))
-        .flatMap((rule) => applyRuleToFile(file, rule)),
-    )
-    .filter(
-      (finding, index, all) =>
-        all.findIndex((item) => uniqueKey(item) === uniqueKey(finding)) === index,
-    );
+  dedupeFindings(files.flatMap((file) => findingsForFile(file, rules)));

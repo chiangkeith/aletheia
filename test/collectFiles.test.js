@@ -27,4 +27,8 @@ test("collectFiles includes source files and skips ignored directories", async (
     relativePaths.some((path) => path.includes("node_modules")),
     false,
   );
+  assert.equal(
+    relativePaths.some((path) => path.includes(".output") || path.includes("_nuxt")),
+    false,
+  );
 });

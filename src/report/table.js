@@ -1,3 +1,5 @@
+import { formatDuration } from "../core/progress.js";
+
 const SEVERITY_LABEL = {
   critical: "CRIT",
   high: "HIGH",
@@ -12,10 +14,22 @@ const truncate = (value, length) =>
   value.length <= length ? value : `${value.slice(0, length - 1)}…`;
 
 export const renderTable = (result) => {
-  const { summary, findings, filesScanned, rulesApplied, target } = result;
+  const {
+    summary,
+    findings,
+    filesScanned,
+    filesSkipped,
+    rulesApplied,
+    target,
+    durationMs,
+  } = result;
   const header = [
     `Target        : ${target}`,
+    ...(durationMs == null ? [] : [`Duration      : ${formatDuration(durationMs)}`]),
     `Files scanned : ${filesScanned}`,
+    ...(filesSkipped
+      ? [`Files skipped : ${filesSkipped} (packed or oversized)`]
+      : []),
     `Rules applied : ${rulesApplied}`,
     `Findings      : ${summary.total} (critical=${summary.critical}, high=${summary.high}, medium=${summary.medium}, low=${summary.low}, info=${summary.info})`,
     "",

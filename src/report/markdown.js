@@ -1,3 +1,5 @@
+import { formatDuration } from "../core/progress.js";
+
 const severityOrder = ["critical", "high", "medium", "low", "info"];
 
 const findingSection = (finding) =>
@@ -36,7 +38,13 @@ export const renderMarkdown = (result) => {
     "",
     `- Target: \`${result.target}\``,
     `- Scanned at: ${result.scannedAt}`,
+    ...(result.durationMs == null
+      ? []
+      : [`- Duration: ${formatDuration(result.durationMs)}`]),
     `- Files scanned: ${result.filesScanned}`,
+    ...(result.filesSkipped
+      ? [`- Files skipped: ${result.filesSkipped} (packed or oversized)`]
+      : []),
     `- Rules applied: ${result.rulesApplied}`,
     `- Total findings: ${result.summary.total}`,
     "",

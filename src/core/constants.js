@@ -44,6 +44,7 @@ export const DEFAULT_IGNORE = Object.freeze([
   "**/.git/**",
   "**/dist/**",
   "**/build/**",
+  "**/out/**",
   "**/coverage/**",
   "**/vendor/**",
   "**/.venv/**",
@@ -52,11 +53,27 @@ export const DEFAULT_IGNORE = Object.freeze([
   "**/.idea/**",
   "**/.vscode/**",
   "**/target/**",
+  "**/.output/**",
+  "**/.nuxt/**",
+  "**/.next/**",
+  "**/.vercel/**",
+  "**/.netlify/**",
+  "**/.svelte-kit/**",
+  "**/.turbo/**",
+  "**/.cache/**",
+  "**/.parcel-cache/**",
+  "**/.webpack/**",
+  "**/.angular/**",
+  "**/_nuxt/**",
   "**/*.min.js",
+  "**/*.bundle.js",
+  "**/*.chunk.js",
   "**/package-lock.json",
   "**/yarn.lock",
   "**/pnpm-lock.yaml",
 ]);
+
+export const MAX_SOURCE_BYTES = 256 * 1024;
 
 export const DEFAULT_CONFIG_NAMES = Object.freeze([
   "aletheia.config.json",

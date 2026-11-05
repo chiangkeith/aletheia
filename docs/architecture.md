@@ -11,7 +11,7 @@
 ```
 ┌─────────────────────────────────────────────┐
 │ CLI（src/cli）                              │
-│  解析参数、退出码、把结果写到 stdout / 文件  │
+│  解析参数、退出码、进度(stderr)、报告(stdout/文件) │
 └───────────────────┬─────────────────────────┘
                     │
 ┌───────────────────▼─────────────────────────┐
@@ -32,7 +32,7 @@
 
 | 层 | 目录 | 职责 | 副作用 |
 | --- | --- | --- | --- |
-| CLI | `src/cli` | 命令定义、用户交互 | 读 argv、写 stdout/文件、设退出码 |
+| CLI | `src/cli` | 命令定义、用户交互 | 读 argv、写 stderr 进度、写 stdout/文件报告、设退出码 |
 | Core | `src/core` | 配置与流水线 | 通过 ingest 读文件 |
 | Ingest | `src/ingest` | 发现源文件并标注语言 | 读文件系统 |
 | Engine | `src/engine` | 把规则应用到源码 | 无 |
@@ -44,12 +44,12 @@
 
 ## 扫描流水线
 
-`scanProject({ target, config })` 是编排函数，步骤固定：
+`scanProject({ target, config, onProgress })` 是编排函数，步骤固定：
 
 1. **collectFiles**  
-   从 `target` 递归列出文件，按扩展名识别语言，再用 include / exclude glob 过滤。默认忽略 `node_modules`、`.git`、`dist`、虚拟环境等。
+   从 `target` 递归列出文件，按扩展名识别语言，再用 include / exclude glob 过滤。默认忽略 `node_modules`、`.git`、`dist`、`.output`、`.next` 等依赖与构建目录；遍历时直接跳过这些目录，避免走进打包产物。
 2. **loadSources**  
-   为每个文件读取 UTF-8 文本。这是明确的 I/O 边界；之后的匹配不再访问磁盘。
+   为每个未超体积上限的文件读取 UTF-8 文本。这是明确的 I/O 边界；之后的匹配不再访问磁盘。明显压缩过的 JS/TS（极少换行的长行）也会被跳过，以免正则卡在 bundle 上。
 3. **getRules**  
    按语言、enable 白名单、disable 黑名单过滤规则表。
 4. **applyRules**  
@@ -59,13 +59,17 @@
 6. **summarizeFindings**  
    统计各严重级别数量。
 
+可选的 `onProgress` 接收结构化事件（`scan:start`、`collect:*`、`read:*`、`scan:skip`、`match:*`、`scan:done`），CLI 把它格式化写到 stderr。库调用不传该回调时保持静默，报告内容不受影响。
+
 返回值形状：
 
 ```ts
 {
   target: string
   scannedAt: string
+  durationMs: number
   filesScanned: number
+  filesSkipped: number
   rulesApplied: number
   summary: { total, critical, high, medium, low, info }
   findings: Finding[]

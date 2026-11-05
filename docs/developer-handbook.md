@@ -141,11 +141,19 @@ node bin/aletheia.js scan ./fixtures/sample-web-service --only sql-injection --f
 import { loadConfig, scanProject, renderReport } from "aletheia";
 
 const config = await loadConfig({ cwd: process.cwd() });
-const result = await scanProject({ target: "./service", config });
+const result = await scanProject({
+  target: "./service",
+  config,
+  onProgress: (event) => {
+    if (event.type === "scan:done") {
+      process.stderr.write(`scanned ${event.filesScanned} files\n`);
+    }
+  },
+});
 process.stdout.write(renderReport(result, "json"));
 ```
 
-库 API 的稳定面：`scanProject`、`loadConfig`、`getRules`、`renderReport`。CLI option 名称可以变，但 JSON finding 字段应保持向后兼容。
+库 API 的稳定面：`scanProject`、`loadConfig`、`getRules`、`renderReport`。CLI option 名称可以变，但 JSON finding 字段应保持向后兼容。`durationMs` 与 `onProgress` 事件是附加信息，不影响 finding 结构。
 
 ## 发布检查清单
 

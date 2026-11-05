@@ -1,4 +1,4 @@
-import { readdir, readFile, stat } from "node:fs/promises";
+import { mkdir, readdir, readFile, stat } from "node:fs/promises";
 import { join } from "node:path";
 
 const isDirectory = async (path) => {
@@ -19,12 +19,12 @@ const listEntries = (dir) =>
     })),
   );
 
-export const walkFiles = async (root) => {
+export const walkFiles = async (root, { skipDir = () => false } = {}) => {
   const visit = async (current) => {
     const entries = await listEntries(current);
     const nested = await Promise.all(
       entries
-        .filter((entry) => entry.isDirectory)
+        .filter((entry) => entry.isDirectory && !skipDir(entry.path))
         .map((entry) => visit(entry.path)),
     );
     return [
@@ -37,6 +37,10 @@ export const walkFiles = async (root) => {
 };
 
 export const readText = (path) => readFile(path, "utf8");
+
+export const fileSize = async (path) => (await stat(path)).size;
+
+export const ensureDir = (dirPath) => mkdir(dirPath, { recursive: true });
 
 export const fileExists = async (path) => {
   try {

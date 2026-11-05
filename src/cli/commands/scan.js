@@ -3,7 +3,8 @@ import { loadConfig } from "../../core/config.js";
 import { EXIT_CODES } from "../../core/constants.js";
 import { scanProject } from "../../core/pipeline.js";
 import { shouldFail } from "../../engine/score.js";
-import { renderReport, writeReport } from "../../report/index.js";
+import { renderReport, resolveReportFormat, writeReport } from "../../report/index.js";
+import { createProgressReporter } from "../progress.js";
 
 const csv = (value) =>
   value
@@ -38,15 +39,39 @@ export const scanCommand = async (targetArg, options) => {
     }),
   });
 
-  const result = await scanProject({ target, config });
-  const report = renderReport(result, options.format ?? config.format);
-  await writeReport(report, options.output);
+  const quiet = Boolean(options.quiet) || options.progress === false;
+  const reporter = createProgressReporter({
+    stream: process.stderr,
+    isTTY: Boolean(process.stderr.isTTY),
+    verbose: Boolean(options.verbose),
+    quiet,
+  });
 
-  if (shouldFail(result.findings, options.failOn ?? config.failOn)) {
-    process.exitCode = EXIT_CODES.findings;
+  try {
+    const result = await scanProject({
+      target,
+      config,
+      onProgress: reporter.onProgress,
+    });
+    reporter.finish();
+
+    const format = resolveReportFormat({
+      cliFormat: options.format,
+      outputPath: options.output,
+      configFormat: config.format,
+    });
+    const report = renderReport(result, format);
+    await writeReport(report, options.output);
+
+    if (options.output && !quiet) {
+      process.stderr.write(`Wrote report to ${options.output}\n`);
+    }
+
+    process.exitCode = shouldFail(result.findings, options.failOn ?? config.failOn)
+      ? EXIT_CODES.findings
+      : EXIT_CODES.ok;
     return result;
+  } finally {
+    reporter.finish();
   }
-
-  process.exitCode = EXIT_CODES.ok;
-  return result;
 };

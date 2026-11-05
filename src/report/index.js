@@ -1,4 +1,6 @@
+import { dirname, extname } from "node:path";
 import { writeFile } from "node:fs/promises";
+import { ensureDir } from "../utils/fs.js";
 import { renderJson } from "./json.js";
 import { renderMarkdown } from "./markdown.js";
 import { renderSarif } from "./sarif.js";
@@ -11,7 +13,28 @@ const RENDERERS = Object.freeze({
   sarif: renderSarif,
 });
 
+const FORMAT_BY_EXTENSION = Object.freeze({
+  ".md": "markdown",
+  ".markdown": "markdown",
+  ".json": "json",
+  ".sarif": "sarif",
+  ".txt": "table",
+});
+
+const withTrailingNewline = (content) =>
+  content.endsWith("\n") ? content : `${content}\n`;
+
 export const supportedFormats = () => Object.keys(RENDERERS);
+
+export const formatFromOutputPath = (outputPath) => {
+  if (!outputPath) {
+    return undefined;
+  }
+  return FORMAT_BY_EXTENSION[extname(outputPath).toLowerCase()];
+};
+
+export const resolveReportFormat = ({ cliFormat, outputPath, configFormat }) =>
+  cliFormat ?? formatFromOutputPath(outputPath) ?? configFormat ?? "table";
 
 export const renderReport = (result, format) => {
   const renderer = RENDERERS[format];
@@ -22,9 +45,11 @@ export const renderReport = (result, format) => {
 };
 
 export const writeReport = async (content, outputPath) => {
+  const body = withTrailingNewline(content);
   if (!outputPath) {
-    process.stdout.write(`${content.endsWith("\n") ? content : `${content}\n`}`);
+    process.stdout.write(body);
     return;
   }
-  await writeFile(outputPath, content.endsWith("\n") ? content : `${content}\n`, "utf8");
+  await ensureDir(dirname(outputPath));
+  await writeFile(outputPath, body, "utf8");
 };

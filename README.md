@@ -12,6 +12,8 @@
 - 报告格式：`table`、`json`、`markdown`、`sarif`
 - 可用 `aletheia.config.json` 和 CLI 参数过滤语言、规则、严重级别
 - `--fail-on` 便于接入 CI：达到阈值时以退出码 `2` 失败
+- 扫描过程默认写到 stderr（收集文件、读取、匹配、耗时），可用 `--quiet` 关闭
+- 默认跳过 `.output` / `.next` 等打包目录，只分析源码
 
 ## 要求
 
@@ -46,11 +48,12 @@ node bin/aletheia.js --help
 node bin/aletheia.js scan .
 ```
 
+扫描过程写在 stderr（收集文件、规则匹配、耗时）。stdout 仍只有报告，因此 JSON / SARIF 可以安全管道给下游。不需要进度时加 `--quiet`。
+
 扫描其它 Web 服务仓库，并写出 Markdown 报告：
 
 ```bash
 node bin/aletheia.js scan /path/to/web-service \
-  --format markdown \
   --output reports/aletheia.md
 ```
 

@@ -13,9 +13,13 @@ const buildProgram = () => {
 
   program
     .command("scan")
+    .description("scan source code; progress is written to stderr")
     .argument("[target]", "path to a web service project", ".")
     .option("-c, --config <path>", "path to aletheia.config.json")
-    .option("-f, --format <format>", "table | json | markdown | sarif", "table")
+    .option(
+      "-f, --format <format>",
+      "table | json | markdown | sarif (inferred from --output when omitted)",
+    )
     .option("-o, --output <path>", "write the report to a file")
     .option("--min-severity <level>", "info | low | medium | high | critical", "info")
     .option("--fail-on <level>", "exit 2 if a finding at this severity or above exists", "high")
@@ -24,6 +28,9 @@ const buildProgram = () => {
     .option("--exclude <globs>", "comma-separated extra exclude globs")
     .option("--only <ids>", "comma-separated rule ids to enable")
     .option("--disable <ids>", "comma-separated rule ids to disable")
+    .option("--no-progress", "hide scan progress")
+    .option("-q, --quiet", "hide scan progress")
+    .option("-v, --verbose", "list each file as it is scanned")
     .action((target, options) => scanCommand(target, options));
 
   program

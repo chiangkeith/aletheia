@@ -20,6 +20,10 @@
 node bin/aletheia.js scan ./fixtures/sample-web-service
 ```
 
+## 为什么 `admin/.output` 或 `_nuxt` 里的文件没被扫？
+
+那些是 Nuxt / Nitro / webpack 打出来的包，不是源码。对压缩后的超长 JS 跑正则会卡很久，误报也多。默认会跳过 `.output`、`.nuxt`、`.next`、`_nuxt`、`dist`、`*.min.js` 等，并跳过过大或明显压缩过的 JS/TS。请扫描 `pages/`、`components/`、`server/` 这类源码目录。
+
 ## 为什么扫描 node_modules 没有结果？
 
 默认忽略依赖目录。第三方包体积大、误报多。若你明确要审计某个依赖源码，把该包拷到扫描目标并在配置里收窄 `include`。
@@ -27,6 +31,10 @@ node bin/aletheia.js scan ./fixtures/sample-web-service
 ## 可以扫描编译后的 `.class` 或二进制吗？
 
 不可以。只处理文本源码与常见配置。Java 请扫描 `.java`，前端请扫描未压缩的源文件。
+
+## 扫描时终端上的进度会不会破坏 JSON / SARIF？
+
+不会。进度写在 **stderr**，报告写在 **stdout** 或 `--output` 指定的文件。管道或重定向 stdout 时仍然得到纯报告。CI 日志里会看到阶段摘要；若日志也要完全安静，加 `--quiet`。
 
 ## JSON 报告能否当 API？
 
