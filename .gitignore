@@ -1,0 +1,11 @@
+node_modules/
+coverage/
+.DS_Store
+*.log
+.tmp/
+dist/
+reports/
+.webvuln.cache/
+.env
+.env.*
+!.env.example

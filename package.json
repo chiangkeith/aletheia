@@ -1,0 +1,35 @@
+{
+  "name": "webvuln-analyzer",
+  "version": "1.0.0",
+  "description": "CLI static analyzer for finding security issues in web service source code",
+  "type": "module",
+  "bin": {
+    "webvuln": "./bin/webvuln.js"
+  },
+  "main": "./src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "start": "node bin/webvuln.js",
+    "scan": "node bin/webvuln.js scan",
+    "test": "node --test test/*.test.js",
+    "test:watch": "node --test --watch test/*.test.js"
+  },
+  "keywords": [
+    "sast",
+    "security",
+    "cli",
+    "web",
+    "vulnerability",
+    "static-analysis"
+  ],
+  "author": "",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "dependencies": {
+    "commander": "^14.0.1"
+  }
+}

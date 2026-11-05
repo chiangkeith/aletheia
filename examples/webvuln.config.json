@@ -1,0 +1,25 @@
+{
+  "include": ["**/*"],
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/coverage/**",
+    "**/vendor/**"
+  ],
+  "languages": [
+    "javascript",
+    "typescript",
+    "python",
+    "php",
+    "java",
+    "go",
+    "generic"
+  ],
+  "minSeverity": "low",
+  "failOn": "high",
+  "format": "table",
+  "rules": {
+    "enable": [],
+    "disable": []
+  }
+}

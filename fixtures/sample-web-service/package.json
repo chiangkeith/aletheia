@@ -1,0 +1,5 @@
+{
+  "name": "sample-web-service",
+  "private": true,
+  "description": "Intentional insecure snippets used only to verify the scanner. Do not deploy."
+}
